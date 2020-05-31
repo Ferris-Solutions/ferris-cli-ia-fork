@@ -1,5 +1,6 @@
 import logging
 from ferris_cli.kafka_handler import FerrisKafkaLoggingHandler
+from ferris_cli.kafka_handler import TaskTrackerMessage
 class Main:
     def __init__(self):
         logging.basicConfig(
@@ -7,19 +8,14 @@ class Main:
             level=logging.INFO, 
             datefmt='%m/%d/%Y %I:%M:%S %p'
             )
-        self.logger = logging.getLogger('simple_example')
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.logger.addHandler(ch)
-        fl = logging.FileHandler("myapp.log")
-        self.logger.addHandler(fl)
-
+        self.logger = logging.getLogger('kafka_logging')
 
         kh = KafkaHandler("broker:29092", "pylog")
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        kh.setFormatter(formatter)
         kh.setLevel(logging.INFO)
         self.logger.addHandler(kh)
+
         
     def run(self):
         while True:
