@@ -10,7 +10,7 @@ class Main:
             )
         self.logger = logging.getLogger('kafka_logging')
 
-        kh = KafkaHandler("broker:29092", "pylog")
+        kh = FerrisKafkaLoggingHandler("broker:29092", "pylog")
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         kh.setFormatter(formatter)
         kh.setLevel(logging.INFO)

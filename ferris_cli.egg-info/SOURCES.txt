@@ -1,12 +1,12 @@
 LICENSE
 MANIFEST.in
+README.md
 build_requirements.txt
 requirements.txt
 setup.cfg
 setup.py
 ferris_cli/__init__.py
-ferris_cli/kafka_handler.py
-ferris_cli/simple.py
+ferris_cli/ferris_cli.py
 ferris_cli.egg-info/PKG-INFO
 ferris_cli.egg-info/SOURCES.txt
 ferris_cli.egg-info/dependency_links.txt

@@ -2,6 +2,28 @@ from logging import StreamHandler
 from kafka import KafkaProducer
 import json
 from datetime import datetime
+import graphyte
+import consul
+
+
+
+class ApplicationConfigurator():
+
+    def get(self,consul_host,consul_port,app_name):
+        config = {}
+        try:
+            c = consul.Consul(host=consul_host, port=consul_port)
+            index = None
+            index, data = c.kv.get(app_name, index=None)
+            the_json = data['Value'].decode("utf-8")
+            config = json.loads(the_json)
+        except Exception as ex:
+            print('Exception in publishing message')
+            print(ex)
+
+        return config
+
+
 
 class KafkaConfig(object):
     def __init__(self, kafka_brokers, json=False):
@@ -35,6 +57,7 @@ class FerrisKafkaLoggingHandler(StreamHandler):
         msg = self.format(record)
         self.kafka_broker.send(msg, self.topic)
 
+
 class MetricMessage(object):
     def __init__(self, metric_key, metric_value, update_time=None):
         self.metric_key = metric_key
@@ -50,6 +73,23 @@ class MetricMessage(object):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
+
+class MetricsAPI:
+
+    def __init__(self):
+        #print("in init")
+        pass
+
+
+    def send(self,graphyte_host,metric_message:MetricMessage):
+        try:
+            graphyte.init(graphyte_host, prefix='ai.ferris')
+            graphyte.send(metric_message.metric_key, metric_message.metric_value)
+        except Exception as ex:
+            print('Exception in publishing message')
+            print(ex)
+        pass
+
 class TaskTrackerMessage(object):
     def __init__(self, job_name,job_key,instance_id,job_status,status_message,update_time, correlation_id):  
         self.job_name = job_name
@@ -62,6 +102,18 @@ class TaskTrackerMessage(object):
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
+
+
+
+class TaskTrackerAPI():
+
+    def __init__(self, broker, topic):
+        self.broker = broker
+        self.topic = topic
+        # Kafka Broker Configuration
+        self.kafka_broker = KafkaConfig(broker)
+    def send(self, record:TaskTrackerMessage):
+        self.kafka_broker.send(record.toJSON(), self.topic)
 
 
 
