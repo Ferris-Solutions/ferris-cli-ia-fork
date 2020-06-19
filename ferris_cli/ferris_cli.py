@@ -5,6 +5,9 @@ from datetime import datetime
 import graphyte
 import consul
 
+from cloudevents.sdk.event import v03
+
+
 
 
 class ApplicationConfigurator():
@@ -22,8 +25,6 @@ class ApplicationConfigurator():
             print(ex)
 
         return config
-
-
 
 class KafkaConfig(object):
     def __init__(self, kafka_brokers, json=False):
@@ -103,11 +104,9 @@ class TaskTrackerMessage(object):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
-
-
 class TaskTrackerAPI():
 
-    def __init__(self, broker, topic):
+    def __init__(self, broker, topic='ferris.jobtracker'):
         self.broker = broker
         self.topic = topic
         # Kafka Broker Configuration
@@ -116,5 +115,14 @@ class TaskTrackerAPI():
         self.kafka_broker.send(record.toJSON(), self.topic)
 
 
+class CloudEventsAPI():
 
+    def __init__(self, broker, topic='ferris.cloudevents'):
+        self.broker = broker
+        self.topic = topic
+        # Kafka Broker Configuration
+        self.kafka_broker = KafkaConfig(broker)
+    def send(self, event):
+        s = json.dumps(event.Properties())
+        self.kafka_broker.send(s, self.topic)
 
