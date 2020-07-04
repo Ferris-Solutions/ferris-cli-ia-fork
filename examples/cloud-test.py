@@ -17,7 +17,6 @@ print(json.dumps(event.Properties()))
 
 
 print (event.Properties()['source'])
-tta = CloudEventsAPI("broker:29092")
-tta.send(event)
+CloudEventsAPI("broker:29092").send(event)
 
 ##print(event.GetData()) 

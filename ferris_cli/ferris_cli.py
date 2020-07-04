@@ -4,24 +4,23 @@ import json
 from datetime import datetime
 import graphyte
 import consul
-
+from jsonformatter import JsonFormatter
 from cloudevents.sdk.event import v03
-
-
-
+import os
+import logging
 
 class ApplicationConfigurator():
 
-    def get(self,consul_host,consul_port,app_name):
+    def get(self,config_key):
         config = {}
         try:
-            c = consul.Consul(host=consul_host, port=consul_port)
+            c = consul.Consul(host=os.environ['CONSUL_HOST'], port=os.environ['CONSUL_PORT'])
             index = None
-            index, data = c.kv.get(app_name, index=None)
+            index, data = c.kv.get(config_key, index=None)
             the_json = data['Value'].decode("utf-8")
             config = json.loads(the_json)
         except Exception as ex:
-            print('Exception in publishing message')
+            print('Exception in getting key')
             print(ex)
 
         return config
@@ -48,12 +47,12 @@ class KafkaConfig(object):
 
 class FerrisKafkaLoggingHandler(StreamHandler):
 
-    def __init__(self, broker, topic):
+    def __init__(self,topic):
         StreamHandler.__init__(self)
-        self.broker = broker
+        self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
         self.topic = topic
         # Kafka Broker Configuration
-        self.kafka_broker = KafkaConfig(broker)
+        self.kafka_broker = KafkaConfig(self.broker)
     def emit(self, record):
         msg = self.format(record)
         self.kafka_broker.send(msg, self.topic)
@@ -81,48 +80,23 @@ class MetricsAPI:
         #print("in init")
         pass
 
-
-    def send(self,graphyte_host,metric_message:MetricMessage):
+    def send(self,metric_message:MetricMessage):
         try:
-            graphyte.init(graphyte_host, prefix='ai.ferris')
+            graphyte.init(os.environ['GRAPHYTE_HOST'], prefix='ai.ferris')
             graphyte.send(metric_message.metric_key, metric_message.metric_value)
         except Exception as ex:
             print('Exception in publishing message')
             print(ex)
         pass
 
-class TaskTrackerMessage(object):
-    def __init__(self, job_name,job_key,instance_id,job_status,status_message,update_time, correlation_id):  
-        self.job_name = job_name
-        self.job_key = job_key
-        self.instance_id = instance_id
-        self.job_status = job_status
-        self.status_message = status_message
-        self.update_time = update_time
-        self.correlation_id = correlation_id
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-class TaskTrackerAPI():
-
-    def __init__(self, broker, topic='ferris.jobtracker'):
-        self.broker = broker
-        self.topic = topic
-        # Kafka Broker Configuration
-        self.kafka_broker = KafkaConfig(broker)
-    def send(self, record:TaskTrackerMessage):
-        self.kafka_broker.send(record.toJSON(), self.topic)
-
 
 class CloudEventsAPI():
 
-    def __init__(self, broker, topic='ferris.cloudevents'):
-        self.broker = broker
+    def __init__(self, topic='ferris.cloudevents'):
+        self.broker = os.environ['GRAPHYTE_HOST'] + ':' + os.environ['GRAPHYTE_HOST']
         self.topic = topic
         # Kafka Broker Configuration
         self.kafka_broker = KafkaConfig(broker)
     def send(self, event):
         s = json.dumps(event.Properties())
         self.kafka_broker.send(s, self.topic)
-
