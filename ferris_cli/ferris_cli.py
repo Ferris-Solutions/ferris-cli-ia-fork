@@ -8,6 +8,8 @@ from jsonformatter import JsonFormatter
 from cloudevents.sdk.event import v03
 import os
 import logging
+import uuid
+from datetime import datetime
 
 class ApplicationConfigurator():
 
@@ -24,6 +26,19 @@ class ApplicationConfigurator():
             print(ex)
 
         return config
+
+    def put(self,config_key, config_value):
+        config = {}
+        try:
+            c = consul.Consul(host=os.environ['CONSUL_HOST'], port=os.environ['CONSUL_PORT'])
+            index = None
+            c.kv.put(config_key, config_value)
+        except Exception as ex:
+            print('Exception in getting key')
+            print(ex)
+
+        return config
+
 
 class KafkaConfig(object):
     def __init__(self, kafka_brokers, json=False):
@@ -53,6 +68,17 @@ class FerrisKafkaLoggingHandler(StreamHandler):
         self.topic = topic
         # Kafka Broker Configuration
         self.kafka_broker = KafkaConfig(self.broker)
+
+        STRING_FORMAT = '''{
+        "Levelname":       "levelname",
+        "Name":            "name",
+        "Asctime":         "asctime",
+        "Message":         "message"
+        }'''
+
+        formatter =  JsonFormatter(STRING_FORMAT)
+        self.setFormatter(formatter)
+
     def emit(self, record):
         msg = self.format(record)
         self.kafka_broker.send(msg, self.topic)
@@ -76,27 +102,32 @@ class MetricMessage(object):
 
 class MetricsAPI:
 
-    def __init__(self):
-        #print("in init")
-        pass
+
+    def __init__(self, topic='ferris.metrics'):
+        self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
+        self.topic = topic
+        # Kafka Broker Configuration
+        self.kafka_broker = KafkaConfig(self.broker)
+        print('metrics init called')
 
     def send(self,metric_message:MetricMessage):
         try:
-            graphyte.init(os.environ['GRAPHYTE_HOST'], prefix='ai.ferris')
-            graphyte.send(metric_message.metric_key, metric_message.metric_value)
+            self.kafka_broker.send(metric_message.toJSON(), self.topic)
         except Exception as ex:
             print('Exception in publishing message')
             print(ex)
-        pass
 
 
 class CloudEventsAPI():
 
     def __init__(self, topic='ferris.cloudevents'):
-        self.broker = os.environ['GRAPHYTE_HOST'] + ':' + os.environ['GRAPHYTE_HOST']
+        self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
         self.topic = topic
         # Kafka Broker Configuration
         self.kafka_broker = KafkaConfig(broker)
     def send(self, event):
+        event.SetEventID(uuid.uuid1().hex)
+        date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        event.SetEventTime(date_time)
         s = json.dumps(event.Properties())
         self.kafka_broker.send(s, self.topic)

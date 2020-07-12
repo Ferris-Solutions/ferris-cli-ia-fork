@@ -3,13 +3,16 @@ import json
 from ferris_cli.ferris_cli import CloudEventsAPI
 import uuid
 
+
+data = {}
+data['correlationId'] = uuid.uuid1().hex
+data['name'] = "john"
+
 event = (
     v03.Event()
     .SetContentType("application/json")
-    .SetData('{"name":"john"}')
-    .SetEventID(uuid.uuid1().hex)
+    .SetData(json.dumps(data))
     .SetSource("from-galaxy-far-far-away")
-    .SetEventTime("tomorrow")
     .SetEventType("cloudevent.greet.you")
 )
 
