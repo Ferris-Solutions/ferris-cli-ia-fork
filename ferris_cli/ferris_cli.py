@@ -10,6 +10,10 @@ import os
 import logging
 import uuid
 from datetime import datetime
+import functools
+import time
+from inspect import getmembers,isfunction,ismethod
+import sys
 
 class ApplicationConfigurator():
 
@@ -124,10 +128,51 @@ class CloudEventsAPI():
         self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
         self.topic = topic
         # Kafka Broker Configuration
-        self.kafka_broker = KafkaConfig(broker)
+        self.kafka_broker = KafkaConfig(self.broker)
     def send(self, event):
         event.SetEventID(uuid.uuid1().hex)
         date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         event.SetEventTime(date_time)
         s = json.dumps(event.Properties())
         self.kafka_broker.send(s, self.topic)
+
+
+# Modified version of Execution-Time (pip)
+
+class ExecutionTime:
+
+    def __init__(self,console=False,module_name=None):
+         
+        self.module_name = module_name
+        self.logtime_data = {}
+
+        if self.module_name is not None:
+            self.auto_decorate()
+    
+    def timeit(self,method):
+        @functools.wraps(method)
+        def wrapper(*args,**kwargs):
+            start_time = time.perf_counter()
+            result = method(*args,**kwargs)
+            end_time = time.perf_counter()
+            total_time = round((end_time-start_time)*1000,4) # time in milliseconds 
+            
+            if method.__name__ in self.logtime_data:
+                curr = self.logtime_data[method.__name__] 
+                tt = curr["total_time"]+total_time
+                count = curr["times_called"]+1
+                avg_time=round(tt/count,4) 
+                self.logtime_data[method.__name__]={'times_called':count,"total_time":tt,"average_time":avg_time}
+            else:
+                self.logtime_data[method.__name__]={'times_called':1,"total_time":total_time,"average_time":total_time}
+
+        return wrapper
+     
+    def auto_decorate(self):
+        try:
+            module = sys.modules[self.module_name]
+            items = getmembers(module,isfunction)
+            for name,addr in items:
+                setattr(module,name,self.timeit(addr))
+        except KeyError as e:
+            raise f'Error Occured, No module by name {module_name}. If you think this was a mistake than raise issue at {self.issue_url}'
