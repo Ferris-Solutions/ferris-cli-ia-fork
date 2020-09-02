@@ -10,6 +10,9 @@ import json
 configs = ApplicationConfigurator().get('ferris.apps.dataloader.minio-adapter')
 print(configs)
 
+environment = ApplicationConfigurator().get('ferris.env')
+print(environment)
+
 dc = {}
 dc['something'] = 'test update nothing'
 
@@ -20,7 +23,6 @@ ApplicationConfigurator().put('atest', json.dumps(dc))
 mm = MetricMessage('some_metric',28)
 print(mm.toJSON())
 mapi = MetricsAPI().send(mm)
-
 
 
 

@@ -7,6 +7,7 @@ setup.cfg
 setup.py
 ferris_cli/__init__.py
 ferris_cli/ferris_cli.py
+ferris_cli/test.py
 ferris_cli.egg-info/PKG-INFO
 ferris_cli.egg-info/SOURCES.txt
 ferris_cli.egg-info/dependency_links.txt

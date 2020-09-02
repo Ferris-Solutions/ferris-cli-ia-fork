@@ -15,6 +15,7 @@ import time
 from inspect import getmembers,isfunction,ismethod
 import sys
 
+
 class ApplicationConfigurator():
 
     def get(self,config_key):
@@ -66,22 +67,13 @@ class KafkaConfig(object):
 
 class FerrisKafkaLoggingHandler(StreamHandler):
 
-    def __init__(self,topic):
+    def __init__(self,topic='ferris.logs'):
         StreamHandler.__init__(self)
-        self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
+        environment = ApplicationConfigurator().get('ferris.env')
+        broker_url = f"{environment['KAFKA_BOOTSTRAP_SERVER']}:{environment['KAFKA_PORT']}"
         self.topic = topic
         # Kafka Broker Configuration
-        self.kafka_broker = KafkaConfig(self.broker)
-
-        STRING_FORMAT = '''{
-        "Levelname":       "levelname",
-        "Name":            "name",
-        "Asctime":         "asctime",
-        "Message":         "message"
-        }'''
-
-        formatter =  JsonFormatter(STRING_FORMAT)
-        self.setFormatter(formatter)
+        self.kafka_broker = KafkaConfig(broker_url)
 
     def emit(self, record):
         msg = self.format(record)
@@ -94,7 +86,7 @@ class MetricMessage(object):
         self.metric_value = metric_value
         if update_time == None:
             dateTimeObj = datetime.now()
-            timestampStr = dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")
+            timestampStr = dateTimeObj.strftime("%Y-%m-%dT%H:%M:%SZ")
             self.update_time = timestampStr
         else:
             self.update_time = update_time
@@ -108,10 +100,9 @@ class MetricsAPI:
 
 
     def __init__(self, topic='ferris.metrics'):
-        self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
         self.topic = topic
         # Kafka Broker Configuration
-        self.kafka_broker = KafkaConfig(self.broker)
+        self.kafka_broker = KafkaConfig(broker_url)
         print('metrics init called')
 
     def send(self,metric_message:MetricMessage):
@@ -124,14 +115,15 @@ class MetricsAPI:
 
 class CloudEventsAPI():
 
-    def __init__(self, topic='ferris.cloudevents'):
-        self.broker = os.environ['KAFKA_BOOTSTRAP_SERVER'] + ':' + os.environ['KAFKA_PORT']
+    def __init__(self, topic='ferris.events'):
         self.topic = topic
         # Kafka Broker Configuration
-        self.kafka_broker = KafkaConfig(self.broker)
+        self.kafka_broker = KafkaConfig(broker_url)
     def send(self, event):
         event.SetEventID(uuid.uuid1().hex)
-        date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        date_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+      
         event.SetEventTime(date_time)
         s = json.dumps(event.Properties())
         self.kafka_broker.send(s, self.topic)
@@ -155,6 +147,7 @@ class ExecutionTime:
             start_time = time.perf_counter()
             result = method(*args,**kwargs)
             end_time = time.perf_counter()
+            current_time = round((end_time-start_time)*1000,4)
             total_time = round((end_time-start_time)*1000,4) # time in milliseconds 
             
             if method.__name__ in self.logtime_data:
@@ -162,9 +155,9 @@ class ExecutionTime:
                 tt = curr["total_time"]+total_time
                 count = curr["times_called"]+1
                 avg_time=round(tt/count,4) 
-                self.logtime_data[method.__name__]={'times_called':count,"total_time":tt,"average_time":avg_time}
+                self.logtime_data[method.__name__]={'times_called':count,"total_time":tt,"average_time":avg_time,"current_time":current_time}
             else:
-                self.logtime_data[method.__name__]={'times_called':1,"total_time":total_time,"average_time":total_time}
+                self.logtime_data[method.__name__]={'times_called':1,"total_time":total_time,"average_time":total_time,"current_time":current_time}
 
         return wrapper
      
@@ -176,3 +169,6 @@ class ExecutionTime:
                 setattr(module,name,self.timeit(addr))
         except KeyError as e:
             raise f'Error Occured, No module by name {module_name}. If you think this was a mistake than raise issue at {self.issue_url}'
+
+environment = ApplicationConfigurator().get('ferris.env')
+broker_url = f"{environment['KAFKA_BOOTSTRAP_SERVER']}:{environment['KAFKA_PORT']}"
