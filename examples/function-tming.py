@@ -16,16 +16,6 @@ def bar():
 
 foo("dragons")
 bar()
-bar()
-bar()
-print(e.logtime_data)
-
-e.logtime_data = {}
-
-foo("dragons")
-bar()
-bar()
-bar()
 print(e.logtime_data)
 
 for k1 in e.logtime_data.keys():
