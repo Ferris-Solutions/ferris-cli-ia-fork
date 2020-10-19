@@ -96,6 +96,7 @@ class MetricMessage(object):
             sort_keys=True, indent=4)
 
 
+
 class MetricsAPI:
 
 
@@ -108,6 +109,37 @@ class MetricsAPI:
     def send(self,metric_message:MetricMessage):
         try:
             self.kafka_broker.send(metric_message.toJSON(), self.topic)
+        except Exception as ex:
+            print('Exception in publishing message')
+            print(ex)
+
+
+
+class Notification(object):
+    def __init__(self, from_addr, to_addr, subject, message_content):
+        self.from_addr = from_addr
+        self.to_addr = to_addr
+        self.subject = subject
+        self.message_content = message_content   
+        if update_time == None:
+            dateTimeObj = datetime.now()
+            timestampStr = dateTimeObj.strftime("%Y-%m-%dT%H:%M:%SZ")
+            self.update_time = timestampStr
+        else:
+            self.update_time = update_time
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
+class NotificatonsAPI():
+    def __init__(self, topic='ferris.notifications'):
+        self.topic = topic
+        # Kafka Broker Configuration
+        self.kafka_broker = KafkaConfig(broker_url)
+    def send(self, notification:Notification):
+        try:
+            self.kafka_broker.send(notification.toJSON(), self.topic)
         except Exception as ex:
             print('Exception in publishing message')
             print(ex)
