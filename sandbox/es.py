@@ -37,7 +37,7 @@ outputText = template.render(time_from=time_from,time_to=time_to,
 print(outputText)
 
 
-res = es.search(index="ferris-metrics", body=outputText)
+res = es.search(index="ferris-events", body=outputText)
 
 print("Got %d Hits:" % res['hits']['total']['value'])
 for hit in res['hits']['hits']:
