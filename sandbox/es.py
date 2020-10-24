@@ -20,8 +20,8 @@ es = Elasticsearch(hosts='http://elasticsearch:9200',verify_certs=False)
 
 
 
-time_from = "2020-08-28T11:47:09Z"
-time_to = "2020-08-28T11:47:09Z"
+time_from = "2020-08-27T11:47:09Z"
+time_to = "2020-08-30T11:47:09Z"
 start_from = 0
 result_size = 20
 metric_type = "ferris.dataloader.*"  
