@@ -24,7 +24,7 @@ time_from = "2020-08-28T11:47:09Z"
 time_to = "2020-08-28T11:47:09Z"
 start_from = 0
 result_size = 20
-metric_type = "*.dataloader.*"  
+metric_type = "ferris.dataloader.*"  
 
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
