@@ -17,14 +17,7 @@ print('done')
 
 es = Elasticsearch(hosts='http://elasticsearch:9200',verify_certs=False)
 
-res = es.search(index="ferris-metrics", body={"query": {"match_all": {}}})
 
-print("Got %d Hits:" % res['hits']['total']['value'])
-for hit in res['hits']['hits']:
-    print(hit["_source"])
-    #print("%(timestamp)s %(author)s: %(text)s" % hit["_source"])
-
-print('done')
 
 
 time_from = "2020-08-28T11:47:09Z"
@@ -44,6 +37,14 @@ outputText = template.render(time_from=time_from,time_to=time_to,
 print(outputText)
 
 
+res = es.search(index="ferris-metrics", body={"query": outputText})
+
+print("Got %d Hits:" % res['hits']['total']['value'])
+for hit in res['hits']['hits']:
+    print(hit["_source"])
+    #print("%(timestamp)s %(author)s: %(text)s" % hit["_source"])
+
+print('done')
 
  
                  
