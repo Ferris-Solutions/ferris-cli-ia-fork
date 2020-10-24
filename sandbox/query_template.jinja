@@ -1,0 +1,35 @@
+{
+   "query":{
+      "bool":{
+         "must":[
+            {
+               "range":{
+                  "time":{
+                     "gt":"{{time_from}}",
+                     "lt":"{{time_to}}"
+                  }
+               }
+            },
+            {
+               "wildcard":{
+                  "type":"{{metric_type}}"
+               }
+            }
+         ],
+         "must_not":[
+            
+         ],
+         "should":[
+            
+         ]
+      }
+   },
+   "from":{{start_from}},
+   "size":{{result_size}},
+   "sort":[
+      
+   ],
+   "aggs":{
+      
+   }
+}
