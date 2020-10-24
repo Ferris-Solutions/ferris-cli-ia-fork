@@ -11,7 +11,7 @@ from elasticsearch import Elasticsearch
 import logging
 from jsonformatter import JsonFormatter
 
-import jinja
+import jinja2
 
 print('done')
 
