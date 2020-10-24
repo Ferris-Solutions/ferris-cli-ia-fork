@@ -20,7 +20,7 @@ ApplicationConfigurator().put('atest', json.dumps(dc))
 
 # Create and send a MetricMessage
 
-mm = MetricMessage('some_metric',28)
+mm = MetricMessage('metrics.hive.table.counts.crm',28)
 print(mm.toJSON())
 mapi = MetricsAPI().send(mm)
 

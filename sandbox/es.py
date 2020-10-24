@@ -21,15 +21,15 @@ es = Elasticsearch(hosts='http://elasticsearch:9200',verify_certs=False)
 
 
 time_from = "2020-08-27T11:47:09Z"
-time_to = "2020-08-30T11:47:09Z"
+time_to = "2020-11-30T11:47:09Z"
 start_from = 0
 result_size = 20
-metric_type = "ferris.dataloader.*"  
+metric_type = "some_metric*"  
 
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
 templateEnv = jinja2.Environment(loader=templateLoader)
-TEMPLATE_FILE = "query_template.jinja"
+TEMPLATE_FILE = "query_template_metrics.jinja"
 template = templateEnv.get_template(TEMPLATE_FILE)
 outputText = template.render(time_from=time_from,time_to=time_to,
 	start_from=start_from,result_size=result_size,metric_type=metric_type) 
@@ -37,7 +37,7 @@ outputText = template.render(time_from=time_from,time_to=time_to,
 print(outputText)
 
 
-res = es.search(index="ferris-events", body=outputText)
+res = es.search(index="ferris-metrics", body=outputText)
 
 print("Got %d Hits:" % res['hits']['total']['value'])
 for hit in res['hits']['hits']:
