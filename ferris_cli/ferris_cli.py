@@ -1,4 +1,4 @@
-from logging import StreamHandler
+from logging import Handler
 from kafka import KafkaProducer
 import json
 from datetime import datetime
@@ -65,10 +65,10 @@ class KafkaConfig(object):
         print("kafka send result: {}".format(result.get()))
 
 
-class FerrisKafkaLoggingHandler(StreamHandler):
+class FerrisKafkaLoggingHandler(Handler):
 
     def __init__(self,topic='ferris.logs'):
-        StreamHandler.__init__(self)
+        Handler.__init__(self)
         environment = ApplicationConfigurator().get('ferris.env')
         broker_url = f"{environment['KAFKA_BOOTSTRAP_SERVER']}:{environment['KAFKA_PORT']}"
         self.topic = topic
