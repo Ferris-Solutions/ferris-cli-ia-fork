@@ -44,6 +44,18 @@ class ApplicationConfigurator():
         return config
 
 
+def on_send_success(record_metadata):
+    logger.debug("Asynch callback on sent!")
+    logger.debug(f"Topic: {record_metadata.topic}")
+    logger.debug(f"Partition: {record_metadata.partition}")
+    logger.debug(f"Offset: {record_metadata.offset}")
+    logger.debug(f"Kafka asynch sent: {record_metadata}")
+
+
+def on_send_error(excp):
+    logger.error('I am an errback', exc_info=excp)
+
+
 class KafkaConfig(object):
     def __init__(self, kafka_brokers, json=False):
         self.json = json
@@ -58,10 +70,9 @@ class KafkaConfig(object):
             )
     def send(self, data, topic):
         if self.json:
-            result = self.producer.send(topic, key=b'log', value=data)
+            self.producer.send(topic, key=b'log', value=data).add_callback(on_send_success).add_errback(on_send_error)
         else:
-            result = self.producer.send(topic, bytes(data, 'utf-8'))
-        logger.debug("kafka send result: {}".format(result.get()))
+            self.producer.send(topic, bytes(data, 'utf-8')).add_callback(on_send_success).add_errback(on_send_error)
 
 
 class FerrisKafkaLoggingHandler(logging.Handler):
