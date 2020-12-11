@@ -53,7 +53,7 @@ def on_send_success(record_metadata):
 
 
 def on_send_error(excp):
-    logger.error('I am an errback', exc_info=excp)
+    logger.error('I am an errback, some error in publishing a message', exc_info=excp)
 
 
 class KafkaConfig(object):
@@ -112,13 +112,10 @@ class MetricsAPI:
         self.topic = topic
         # Kafka Broker Configuration
         self.kafka_broker = KafkaConfig(broker_url)
-        print('metrics init called')
+        logger.debug("MetricsAPI init called")
 
     def send(self,metric_message:MetricMessage):
-        try:
             self.kafka_broker.send(metric_message.toJSON(), self.topic)
-        except Exception as ex:
-            logger.exception('Exception in publishing message')
 
 
 class Notification(object):
@@ -145,11 +142,7 @@ class NotificatonsAPI():
         # Kafka Broker Configuration
         self.kafka_broker = KafkaConfig(broker_url)
     def send(self, notification:Notification):
-        try:
             self.kafka_broker.send(notification.toJSON(), self.topic)
-        except Exception as ex:
-            logging.exception('Exception in publishing message')
-
 
 class CloudEventsAPI():
 
