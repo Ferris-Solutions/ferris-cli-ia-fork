@@ -75,10 +75,10 @@ class KafkaConfig(object):
             self.producer.send(topic, bytes(data, 'utf-8')).add_callback(on_send_success).add_errback(on_send_error)
 
 
-class FerrisKafkaLoggingHandler(logging.Handler):
+class FerrisKafkaLoggingHandler(logging.StreamHandler):
 
     def __init__(self, topic='ferris.logs'):
-        logging.Handler.__init__(self)
+        logging.StreamHandler.__init__(self)
         environment = ApplicationConfigurator().get('ferris.env')
         broker_url = f"{environment['KAFKA_BOOTSTRAP_SERVER']}:{environment['KAFKA_PORT']}"
         self.topic = topic
