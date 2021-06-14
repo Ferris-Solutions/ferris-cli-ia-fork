@@ -21,11 +21,13 @@ class ApplicationConfigurator:
 
 class Consul:
 
-    def __init__(self):
-        if os.environ.get('CONSUL_HOST', None):
+    def __init__(self, consul_host=None, constul_port=None):
+        CONSUL_HOST = consul_host if consul_host else os.environ.get('CONSUL_HOST', None)
+        CONSUL_PORT = constul_port if constul_port else os.environ.get('CONSUL_PORT', None)
+        if CONSUL_HOST:
             self.client = consul.Consul(
-                host=os.environ['CONSUL_HOST'],
-                port=os.environ['CONSUL_PORT']
+                host=CONSUL_HOST,
+                port=CONSUL_PORT
             )
 
     def get_all(self):

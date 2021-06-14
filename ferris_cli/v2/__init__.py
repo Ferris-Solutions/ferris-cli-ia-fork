@@ -3,11 +3,11 @@ import time
 import functools
 from inspect import getmembers, isfunction, ismethod
 
-from services.config import ApplicationConfigurator
-from services.broker import FerrisBroker
-from services.events import FerrisEvents
-from services.notifications import FerrisNotificatons
-from services.logging_handler import FerrisLogging
+from ferris_cli.v2.services.config import ApplicationConfigurator
+from ferris_cli.v2.services.broker import FerrisBroker
+from ferris_cli.v2.services.events import FerrisEvents
+from ferris_cli.v2.services.notifications import FerrisNotificatons
+from ferris_cli.v2.services.logging_handler import FerrisLogging
 
 
 class ExecutionTime:

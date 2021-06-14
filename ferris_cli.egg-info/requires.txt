@@ -1,5 +1,5 @@
+cloudevents
+graphyte==1.6.0
+jsonformatter
 kafka-python<1.5,>=1.4.6
 python-consul
-graphyte==1.6.0
-cloudevents
-jsonformatter
