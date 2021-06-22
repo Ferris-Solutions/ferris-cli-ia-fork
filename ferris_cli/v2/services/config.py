@@ -4,7 +4,6 @@ import consul
 import os
 
 LOGS_KEY = "ferris_cli.config"
-
 DEFAULT_CONFIG = os.environ.get('DEFAULT_CONFIG', 'ferris.env')
 
 
