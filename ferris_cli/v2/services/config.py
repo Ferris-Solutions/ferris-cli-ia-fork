@@ -11,7 +11,10 @@ DEFAULT_CONFIG = os.environ.get('DEFAULT_CONFIG', 'ferris.env')
 class ApplicationConfigurator:
 
     @staticmethod
-    def get(config_key):
+    def get(config_key=None):
+        if not config_key:
+            config_key = os.environ.get("APP_NAME", None)
+
         return Consul().get(config_key)
 
     @staticmethod
