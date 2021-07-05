@@ -5,3 +5,10 @@ app.db
 env
 venv
 *.sublime*
+./tmp
+/build
+/dist
+.idea
+.idea/*
+*.egg-info
+testscript*

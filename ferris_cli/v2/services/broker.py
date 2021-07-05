@@ -11,18 +11,25 @@ LOGS_KEY = "ferris_cli.broker"
 
 class FerrisBroker:
 
-    @staticmethod
-    def send(topic, data, is_json=True):
-        resp = FerrisKafka(is_json).send(topic, data)
+    def __init__(self, host=None, port=None):
+        self.host = host
+        self.port = port
+
+    def send(self, topic, data, is_json=True):
+        resp = FerrisKafka(self.host, self.port, is_json).send(topic, data)
 
         return resp
 
 
 class FerrisKafka:
 
-    def __init__(self, is_json=True):
+    def __init__(self, host=None, port=None, is_json=True):
         conf = ApplicationConfigurator.get(DEFAULT_CONFIG)
-        broker_address = f"{conf.get('KAFKA_BOOTSTRAP_SERVER')}:{conf.get('KAFKA_PORT')}"
+
+        if host and port:
+            broker_address = f"{host}:{port}"
+        else:
+            broker_address = f"{conf.get('KAFKA_BOOTSTRAP_SERVER')}:{conf.get('KAFKA_PORT')}"
 
         self._is_json = is_json
 
@@ -34,6 +41,7 @@ class FerrisKafka:
         )
 
     def send(self, topic, message):
+
         resp = self.producer.send(
             topic,
             message
