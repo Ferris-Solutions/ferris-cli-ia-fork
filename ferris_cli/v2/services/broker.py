@@ -45,6 +45,6 @@ class FerrisKafka:
         resp = self.producer.send(
             topic,
             message
-        )
+        ).get()
 
         return resp

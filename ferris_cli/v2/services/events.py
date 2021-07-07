@@ -5,9 +5,21 @@ from datetime import datetime
 import logging
 from kafka import KafkaProducer
 from cloudevents.sdk.event.v1 import Event
+from .broker import FerrisBroker
+from .config import ApplicationConfigurator, DEFAULT_CONFIG
 
 
 class FerrisEvents:
+
+    def __init__(self):
+        conf = ApplicationConfigurator().get(DEFAULT_CONFIG)
+
+        print(conf, flush=True)
+
+        self.broker = FerrisBroker(
+            host=conf.get('KAFKA_BOOTSTRAP_SERVER'),
+            port=conf.get('KAFKA_PORT')
+        )
 
     def send(self, event_type, event_source, data, topic=None, reference_id=None):
 
