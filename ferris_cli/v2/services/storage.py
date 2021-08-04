@@ -1,26 +1,35 @@
-import csv
-import hashlib
 import json
-import mimetypes
 import os
 
 from minio import Minio
+from .config import ApplicationConfigurator, DEFAULT_CONFIG
 
 
-class MinioService:
+class MinioService(object):
 
-    host = 'minio1:9000'
-    a_key = 'minio'
-    s_key = 'minio123'
+    host = None
+    a_key = None
+    s_key = None
     secure_connection = False
 
-    def __init__(self):
+    def __init__(self, config=None):
+
+        if config:
+            self.host = config["MINIO_HOST"]
+            self.a_key = config["MINIO_ACCESS_KEY"]
+            self.s_key = config["MINIO_SECRET_KEY"]
+            self.secure_connection = config["MINIO_SECURE_CONNECTION"]
+        else:
+            self.host = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_HOST')
+            self.a_key = ApplicationConfigurator.get(DEFAULT_CONFIG).get("MINIO_ACCESS_KEY")
+            self.s_key = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_SECRET_KEY')
+            self.secure_connection = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_SECURE_CONNECTION')
 
         self.service = Minio(
             self.host,
             access_key=self.a_key,
             secret_key=self.s_key,
-            secure=self.secure_connection
+            secure=False
 
         )
 
@@ -43,36 +52,14 @@ class MinioService:
     def get(self, config_key):
         return json.loads('{"Value": "value", "Key": "key"}')
 
-    def create_object(self, data):
+    def create_object(self, file_path, bucket_name, file_name=None):
 
-        self.validate_object_type(data)
+        file_name = file_name if file_name else file_name.split('/')[-1]
 
-        full_file_name = data["file"].filename
+        with open(file_path, 'rb') as file_data:
+            self.service.put_object(bucket_name, file_name, file_data, os.stat(file_path).st_size)
 
-        data["file"].save('/tmp/' + full_file_name)
-        file_stat = os.stat('/tmp/' + full_file_name)
-
-        file_hash = hashlib.md5(open('/tmp/' + full_file_name, 'rb').read()).hexdigest()
-
-        if file_stat.st_size == 0:
-            raise Exception("File is empty.")
-
-        self.validate_object_content(data)
-
-        with open('/tmp/' + full_file_name, 'rb') as file_data:
-            self.service.put_object(data["bucket_name"], full_file_name, file_data, file_stat.st_size)
-            os.remove('/tmp/' + full_file_name)
-
-        return full_file_name, file_hash
-
-    # def upload_file(self, data):
-    #
-    #     full_file_name = data["full_file_name"]
-    #     file_stat = os.stat('/tmp/' + full_file_name)
-    #
-    #     with open('/tmp/' + full_file_name, 'rb') as file_data:
-    #         self.service.put_object(data["bucket_name"], full_file_name, file_data, file_stat.st_size)
-    #         os.remove('/tmp/' + full_file_name)
+        return True
 
     def get_all_from_all_buckets(self):
         buckets = self.get_buckets()
@@ -109,4 +96,10 @@ class MinioService:
     def delete_object(self, bucket_name, object_name):
         self.service.remove_object(bucket_name, object_name)
 
+    def validate_object_type(self, data):
 
+        pass
+
+    def validate_object_content(self, data):
+
+        pass
