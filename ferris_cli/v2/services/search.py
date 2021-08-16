@@ -71,5 +71,6 @@ class ElasticService:
                 ]
             }
             print(body, flush=True)
+            print(self.index, flush=True)
 
         return body

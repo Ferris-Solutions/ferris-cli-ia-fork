@@ -1,4 +1,5 @@
 import json
+import datetime
 import os
 
 from minio import Minio
@@ -11,6 +12,7 @@ class MinioService(object):
     a_key = None
     s_key = None
     secure_connection = False
+    entity = None
 
     def __init__(self, config=None):
 
@@ -49,17 +51,44 @@ class MinioService(object):
                 return b.__dict__
         return "{}"
 
-    def get(self, config_key):
-        return json.loads('{"Value": "value", "Key": "key"}')
+    def create_object(self, file, bucket_name, supported_extensions=None, subfolder=None, file_name=None):
 
-    def create_object(self, file_path, bucket_name, file_name=None):
+        self.validate_file_extension(file, supported_extensions)
+        file_path = self.save_file_to_system(file)
 
-        file_name = file_name if file_name else file_name.split('/')[-1]
+        file_name = file_name if file_name else self.generate_file_name(file_path)
+        if subfolder:
+            file_name = f"{subfolder}/{file_name}"
 
         with open(file_path, 'rb') as file_data:
             self.service.put_object(bucket_name, file_name, file_data, os.stat(file_path).st_size)
-
+            os.remove(file_path)
         return True
+
+    def generate_file_name(self, original_file_name):
+
+        ts = datetime.datetime.utcnow().strftime('%d-%m-%Y_%H:%M:%S')
+
+        return self.entity + "_" + ts + "." + self.get_file_extension(original_file_name)
+
+    @staticmethod
+    def get_file_extension(original_file_name):
+        return original_file_name.split(".")[-1]
+
+    @staticmethod
+    def validate_file_extension(file, supported_extensions=None):
+
+        if supported_extensions and file.filename.rsplit(".")[1] in supported_extensions:
+            return True
+
+        return True if supported_extensions is None else False
+
+    @staticmethod
+    def save_file_to_system(file_object, folder_path='/tmp/'):
+
+        file_object.save(folder_path + file_object.filename)
+
+        return folder_path + file_object.filename
 
     def get_all_from_all_buckets(self):
         buckets = self.get_buckets()
@@ -71,6 +100,13 @@ class MinioService(object):
             for obj in objects_in_bucket:
                 objects_list.append(obj.__dict__)
 
+        return objects_list
+
+    def get_all_from_bucket(self, bucket_name):
+        objects_list = []
+        objects_in_bucket = self.service.list_objects(bucket_name)
+        for obj in objects_in_bucket:
+            objects_list.append(obj.__dict__)
         return objects_list
 
     def get_number_of_objects_in_bucket(self, bucket_name):
