@@ -19,10 +19,12 @@ class FerrisEvents:
             port=conf.get('KAFKA_PORT')
         )
 
+        self.default_topic = conf.get("DEFAULT_TOPIC", "ferris.events")
+
     def send(self, event_type, event_source, data, topic=None, reference_id=None):
 
         if not topic:
-            topic = os.environ.get("DEFAULT_TOPIC", "ferris.events.topic")
+            topic = self.default_topic
 
         date_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
