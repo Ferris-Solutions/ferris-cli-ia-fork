@@ -1,6 +1,7 @@
 import os
 from elasticsearch import Elasticsearch
 import logging
+from .config import ApplicationConfigurator, DEFAULT_CONFIG
 
 tracer = logging.getLogger('elasticsearch')
 tracer.setLevel(logging.CRITICAL)
@@ -11,7 +12,7 @@ class ElasticService:
     namespace_key = None
     namespace_value = None
 
-    es_host = os.environ.get('ES_HOST', None)
+    es_host = conf = ApplicationConfigurator().get().get('ES_HOST')
 
     def __init__(self, index, namespace_key, namespace_value):
         self.service = Elasticsearch(
