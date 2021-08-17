@@ -26,7 +26,6 @@ class ElasticService:
         self.service.indices.refresh(index=self.index)
 
         body = self._get_body(query)
-        body.pop("sort")
 
         json_data = self.service.count(
             index=self.index,
@@ -39,22 +38,30 @@ class ElasticService:
 
         data = self.service.search(
             index=self.index,
-            body=self._get_body(query, sort_column),
+            body=self._get_body(query),
             size=count,
             from_=offset
         )
         return data["hits"]["hits"]
 
-    def _get_body(self, query=None, sort_column="@timestamp"):
-        body = {
-            'query': {
-                'match_all': {}
-            },
-            'sort': [
-                {sort_column: {"order": "desc"}},
+    def _get_body(self, query=None, sort_column=None):
+        if sort_column:
 
-            ]
-        }
+            body = {
+                'query': {
+                    'match_all': {}
+                },
+                'sort': [
+                    {sort_column: {"order": "desc"}},
+
+                ]
+            }
+        else:
+            body = {
+                'query': {
+                    'match_all': {}
+                },
+            }
 
         if query:
             if self.namespace_value:
@@ -66,12 +73,6 @@ class ElasticService:
 
             body = {
                 'query': query,
-                'sort': [
-                    {sort_column: {"order": "desc"}},
-
-                ]
             }
-            print(body, flush=True)
-            print(self.index, flush=True)
 
         return body
