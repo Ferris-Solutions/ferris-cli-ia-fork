@@ -1,8 +1,10 @@
 import json
 import datetime
 import os
+import hashlib
 
 from minio import Minio
+from minio.commonconfig import CopySource
 from .config import ApplicationConfigurator, DEFAULT_CONFIG
 
 
@@ -24,14 +26,14 @@ class MinioService(object):
         else:
             self.host = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_HOST')
             self.a_key = ApplicationConfigurator.get(DEFAULT_CONFIG).get("MINIO_ACCESS_KEY")
-            self.s_key = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_SECRET_KEY')
-            self.secure_connection = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_SECURE_CONNECTION')
+            self.s_key = os.environ.get('MINIO_SECRET_KEY')
+            self.secure_connection = ApplicationConfigurator.get(DEFAULT_CONFIG).get('MINIO_SECURE_CONNECTION', False)
 
         self.service = Minio(
             self.host,
             access_key=self.a_key,
             secret_key=self.s_key,
-            secure=False
+            secure=self.secure_connection
 
         )
 
@@ -52,24 +54,27 @@ class MinioService(object):
         return "{}"
 
     def create_object(self, file, bucket_name, supported_extensions=None, subfolder=None, file_name=None):
-
+        print([file, bucket_name, supported_extensions, subfolder, file_name], flush=True)
         self.validate_file_extension(file, supported_extensions)
-        file_path = self.save_file_to_system(file)
 
-        file_name = file_name if file_name else self.generate_file_name(file_path)
+        file_path = self.save_file_to_system(file)
+        file_stat = os.stat(file_path)
+        file_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+
+        file_name = file_name if file_name else file.filename
+
         if subfolder:
             file_name = f"{subfolder}/{file_name}"
 
         with open(file_path, 'rb') as file_data:
-            self.service.put_object(bucket_name, file_name, file_data, os.stat(file_path).st_size)
+            print(file_path, flush=True)
+            try:
+                res = self.service.put_object(bucket_name, file_name, file_data, file_stat.st_size)
+            except Exception as e:
+                print(e, flush=True)
             os.remove(file_path)
-        return True
 
-    def generate_file_name(self, original_file_name):
-
-        ts = datetime.datetime.utcnow().strftime('%d-%m-%Y_%H:%M:%S')
-
-        return self.entity + "_" + ts + "." + self.get_file_extension(original_file_name)
+        return file_name, file_hash
 
     @staticmethod
     def get_file_extension(original_file_name):
@@ -139,3 +144,24 @@ class MinioService(object):
     def validate_object_content(self, data):
 
         pass
+
+    def copy_file(self, source_bucket, source_object, dest_bucket, dest_object):
+        result = self.service.copy_object(
+            dest_bucket,
+            dest_object,
+            CopySource(source_bucket, source_object),
+        )
+
+        print(result, flush=True)
+
+        return result.object_name
+
+    def move_file(self, source_bucket, source_object, dest_bucket, dest_object):
+        res = self.copy_file(source_bucket, source_object, dest_bucket, dest_object)
+
+        remove_res = self.service.remove_object(source_bucket, source_object)
+
+        print(remove_res, flush=True)
+
+        return True
+

@@ -14,7 +14,7 @@ class ElasticService:
 
     es_host = conf = ApplicationConfigurator().get().get('ES_HOST')
 
-    def __init__(self, index, namespace_key, namespace_value):
+    def __init__(self, index, namespace_key=None, namespace_value=None):
         self.service = Elasticsearch(
             self.es_host
         )

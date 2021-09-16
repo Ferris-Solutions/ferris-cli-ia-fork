@@ -1,3 +1,4 @@
+
 from logging import StreamHandler
 from kafka import KafkaProducer
 import json
