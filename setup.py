@@ -7,7 +7,7 @@ PROJECT_ROOT, _ = os.path.split(__file__)
 NAME = 'ferris-cli'
 EMAILS = 'bal@ballab.com'
 AUTHORS = 'Balaji Bal'
-VERSION = '2.2.1'
+VERSION = '2.2.2'
 
 URL = 'https://github.com/Ferris-Labs/ferris-cli/tree/v2'
 LICENSE = 'Apache2.0'
