@@ -34,35 +34,22 @@ class ElasticService:
 
         return int(json_data["count"])
 
-    def get_all(self, offset=0, count=25, query=None, sort_column="@timestamp"):
+    def get_all(self, offset=0, count=25, query=None, sort_column=None):
+
+        body = self._get_body(query, sort_column)
+
+        print(body, flush=True)
 
         data = self.service.search(
             index=self.index,
-            body=self._get_body(query),
+            body=body,
             size=count,
             from_=offset
         )
+
         return data["hits"]["hits"]
 
     def _get_body(self, query=None, sort_column=None):
-        if sort_column:
-
-            body = {
-                'query': {
-                    'match_all': {}
-                },
-                'sort': [
-                    {sort_column: {"order": "desc"}},
-
-                ]
-            }
-        else:
-            body = {
-                'query': {
-                    'match_all': {}
-                },
-            }
-
         if query:
             if self.namespace_value:
                 query['bool']['must'].append({
@@ -74,5 +61,17 @@ class ElasticService:
             body = {
                 'query': query,
             }
+
+        if sort_column:
+
+            body['sort'] = [
+                    {
+                        sort_column: {
+                            "order": "desc",
+                            # "nested": {"path": "payload"},
+                            # "unmapped_type": 'long'
+                        }
+                    },
+                ]
 
         return body

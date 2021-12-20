@@ -53,7 +53,7 @@ class MinioService(object):
                 return b.__dict__
         return "{}"
 
-    def create_object(self, file, bucket_name, supported_extensions=None, subfolder=None, file_name=None):
+    def create_object(self, file, bucket_name, supported_extensions=None, subfolder=None, file_name=None, get_etag=False):
         print([file, bucket_name, supported_extensions, subfolder, file_name], flush=True)
         self.validate_file_extension(file, supported_extensions)
 
@@ -70,10 +70,13 @@ class MinioService(object):
             print(file_path, flush=True)
             try:
                 res = self.service.put_object(bucket_name, file_name, file_data, file_stat.st_size)
+                print(res._etag, flush=True)
             except Exception as e:
                 print(e, flush=True)
             os.remove(file_path)
 
+        if get_etag:
+            return file_name, file_hash, res._etag
         return file_name, file_hash
 
     @staticmethod
@@ -152,9 +155,7 @@ class MinioService(object):
             CopySource(source_bucket, source_object),
         )
 
-        print(result, flush=True)
-
-        return result.object_name
+        return result
 
     def move_file(self, source_bucket, source_object, dest_bucket, dest_object):
         res = self.copy_file(source_bucket, source_object, dest_bucket, dest_object)
@@ -163,5 +164,5 @@ class MinioService(object):
 
         print(remove_res, flush=True)
 
-        return True
+        return res._etag
 
