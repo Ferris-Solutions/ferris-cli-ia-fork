@@ -3,3 +3,5 @@ python-consul
 graphyte==1.6.0
 cloudevents
 jsonformatter
+python-keycloak==0.26.1
+minio
