@@ -9,6 +9,7 @@ from ferris_cli.v2.services.events import FerrisEvents
 from ferris_cli.v2.services.notifications import FerrisNotificatons
 from ferris_cli.v2.services.logging_handler import FerrisLogging
 from ferris_cli.v2.services.storage import MinioService
+from ferris_cli.v2.services.oidc import FerrisOIDC
 
 
 class ExecutionTime:
