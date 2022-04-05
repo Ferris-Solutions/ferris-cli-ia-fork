@@ -7,7 +7,7 @@ PROJECT_ROOT, _ = os.path.split(__file__)
 NAME = 'ferris-cli'
 EMAILS = 'bal@ballab.com'
 AUTHORS = 'Balaji Bal'
-VERSION = '2.3.3'
+VERSION = '2.4.1'
 
 URL = 'https://github.com/Ferris-Labs/ferris-cli/tree/v2'
 LICENSE = 'Apache2.0'
@@ -39,7 +39,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    # download_url='https://github.com/Integration-Alpha/ferris-cli/archive/{0}.tar.gz'.format(VERSION),
     description=SHORT_DESCRIPTION,
     long_description=DESCRIPTION,
     license=LICENSE,

@@ -1,5 +1,6 @@
 from keycloak import KeycloakOpenID
 import os
+from .config import ApplicationConfigurator, DEFAULT_CONFIG
 
 
 class FerrisOIDC:
@@ -15,12 +16,14 @@ class FerrisOIDC:
 class FerrisKeycloak:
 
     def __init__(self):
+        config = ApplicationConfigurator.get()
+
         self._keycloak_openid = KeycloakOpenID(
-            server_url=os.environ.get('KEYCLOAK_NETWORK_HOSTNAME'),
-            client_id=os.environ.get('KEYCLOAK_CLIENT_ID'),
-            realm_name=os.environ.get('KEYCLOAK_REALM'),
-            client_secret_key=os.environ.get('KEYCLOAK_CLIENT_SECRET'),
-            custom_headers={"host": os.environ.get('KEYCLOAK_PUBLIC_HOSTNAME')}
+            server_url=config.get('KEYCLOAK_NETWORK_HOSTNAME'),
+            client_id=config.get('KEYCLOAK_CLIENT_ID'),
+            realm_name=config.get('KEYCLOAK_REALM'),
+            client_secret_key=config.get('KEYCLOAK_CLIENT_SECRET'),
+            custom_headers={"host": config.get('KEYCLOAK_PUBLIC_HOSTNAME')}
         )
 
     def introspect(self, token):
