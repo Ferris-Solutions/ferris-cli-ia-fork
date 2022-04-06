@@ -1,8 +1,7 @@
 
 import logging
 
-from ferris_cli import FerrisKafkaLoggingHandler
-from ferris_cli import CloudEventsAPI
+from ferris_cli.ferris_cli import FerrisKafkaLoggingHandler
 from jsonformatter import JsonFormatter
 
 logger = logging.getLogger('kafka_logging')
