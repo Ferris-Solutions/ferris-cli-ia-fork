@@ -1,4 +1,5 @@
 import logging
+import json
 from logging import StreamHandler, Formatter
 
 from .config import ApplicationConfigurator, DEFAULT_CONFIG
@@ -16,6 +17,7 @@ class FerrisLogging:
     def get_logger(self, name, use_colors=False, _disable_streaming=False, _print_name=True):
         logging.raiseExceptions = False
         self.lg = logging.getLogger(name)
+
         self.lg.addHandler(
             FerrisLoggingHandler(use_colors=use_colors, _disable_streaming=_disable_streaming, _print_name=_print_name)
         )
@@ -61,7 +63,8 @@ class FerrisLoggingHandler(StreamHandler):
         if not self._streaming_disabled:
             self.setFormatter(LogstashFormatterV1())
             msg = self.format(record)
-            FerrisBroker().send(self.topic, msg, True)
+
+            FerrisBroker().send(self.topic, json.loads(msg), True)
 
 
 class CustomFormatter(Formatter):

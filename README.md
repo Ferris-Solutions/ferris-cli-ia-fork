@@ -111,3 +111,24 @@ minio_service.copy_file(source_bucket="sourcebucketname", source_object="sourceo
 minio_service.move(source_bucket="sourcebucketname", source_object="sourceobjectname", dest_bucket="destinationbucketname", dest_object="destinationobjectname")
 ```
 
+## Logging handler
+
+Wrapper around python logging with ability to send logs to Kafka stream (default behaviour).
+
+```python
+from ferris_cli.v2 import FerrisLogging
+
+logging = FerrisLogging().get_logger(name="SomeName", use_colors=True)
+logging.debug("debug msg")
+logging.info("info msg")
+logging.error("error msg")
+logging.warning("warning msg")
+logging.critical("critical msg")
+```
+
+#### FerrisLogging().get_logger(name="SomeName", use_colors=True)
+
+| key        | required | description                                                                                                                   |
+|------------|----------|-------------------------------------------------------------------------------------------------------------------------------|
+| name       | yes      | name of the logger                                                                                                            |
+| use_colors | no       | if set to `True` logging output will be colorized (DEBUG: green, INFO: cyan, WARNING: yellow, ERROR: red, CRITICAL: red bold) |
