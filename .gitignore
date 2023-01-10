@@ -7,7 +7,7 @@ venv
 *.sublime*
 ./tmp
 /build
-/dist
+#/dist
 .idea
 .idea/*
 *.egg-info
