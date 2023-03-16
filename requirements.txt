@@ -8,7 +8,7 @@ graphyte
 cloudevents
 jsonformatter
 python-keycloak
-minio==7.0.3
-elasticsearch==7.12.0
+minio>=7.0.3
+elasticsearch>=7.12.0
 psycopg2-binary
 SQLAlchemy
