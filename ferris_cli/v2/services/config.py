@@ -62,9 +62,8 @@ class Consul:
             index, data = self.client.kv.get(config_key, index=None)
 
             return json.loads(data['Value'].decode('UTF-8'))
-
         except Exception as e:
-            logging.getLogger(LOGS_KEY).exception(e)
+            logging.getLogger(LOGS_KEY).exception(f"Config {config_key} not found")
 
         return data
 

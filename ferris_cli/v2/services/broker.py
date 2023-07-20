@@ -37,7 +37,8 @@ class FerrisKafka:
 
         self.producer = KafkaProducer(
             bootstrap_servers=broker_address,
-            value_serializer=value_serializer
+            value_serializer=value_serializer,
+            max_request_size=10485760
         )
 
     def send(self, topic, message):

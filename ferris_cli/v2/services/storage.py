@@ -76,7 +76,8 @@ class MinioService(object):
             os.remove(file_path)
 
         if get_etag:
-            return file_name, file_hash, res._etag
+            etag = self.get_etag(res._object_name)
+            return file_name, file_hash, etag
         return file_name, file_hash
 
     @staticmethod
@@ -106,6 +107,7 @@ class MinioService(object):
             objects_in_bucket = self.service.list_objects(bucket["_name"])
 
             for obj in objects_in_bucket:
+                obj._etag = self.get_etag(obj._object_name)
                 objects_list.append(obj.__dict__)
 
         return objects_list
@@ -114,6 +116,7 @@ class MinioService(object):
         objects_list = []
         objects_in_bucket = self.service.list_objects(bucket_name)
         for obj in objects_in_bucket:
+            obj._etag = self.get_etag(obj._object_name)
             objects_list.append(obj.__dict__)
         return objects_list
 
@@ -163,6 +166,9 @@ class MinioService(object):
         remove_res = self.service.remove_object(source_bucket, source_object)
 
         print(remove_res, flush=True)
+        etag = self.get_etag(res._object_name)
+        return etag
 
-        return res._etag
-
+    def get_etag(self, file_name):
+        etag = hashlib.md5(file_name.encode('utf-8')).hexdigest()
+        return etag
