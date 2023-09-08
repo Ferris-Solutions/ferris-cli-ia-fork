@@ -16,6 +16,8 @@ import time
 from inspect import getmembers,isfunction,ismethod
 import sys
 
+DEFAULT_CONFIG = os.environ.get('DEFAULT_CONFIG', 'ferris.env')
+
 
 class ApplicationConfigurator():
 
@@ -70,7 +72,7 @@ class FerrisKafkaLoggingHandler(StreamHandler):
 
     def __init__(self,topic='ferris.logs'):
         StreamHandler.__init__(self)
-        environment = ApplicationConfigurator().get('ferris.env')
+        environment = ApplicationConfigurator().get(DEFAULT_CONFIG)
         broker_url = f"{environment['KAFKA_BOOTSTRAP_SERVER']}:{environment['KAFKA_PORT']}"
         self.topic = topic
         # Kafka Broker Configuration
@@ -203,5 +205,6 @@ class ExecutionTime:
         except KeyError as e:
             raise f'Error Occured, No module by name {module_name}. If you think this was a mistake than raise issue at {self.issue_url}'
 
-environment = ApplicationConfigurator().get('ferris.env')
+
+environment = ApplicationConfigurator().get(DEFAULT_CONFIG)
 broker_url = f"{environment['KAFKA_BOOTSTRAP_SERVER']}:{environment['KAFKA_PORT']}"

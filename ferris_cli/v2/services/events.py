@@ -11,8 +11,8 @@ from .config import ApplicationConfigurator, DEFAULT_CONFIG
 
 class FerrisEvents:
 
-    def __init__(self):
-        conf = ApplicationConfigurator().get(DEFAULT_CONFIG)
+    def __init__(self, config=None):
+        conf = config or ApplicationConfigurator().get(DEFAULT_CONFIG)
 
         self.broker = FerrisBroker(
             host=conf.get('KAFKA_BOOTSTRAP_SERVER'),
