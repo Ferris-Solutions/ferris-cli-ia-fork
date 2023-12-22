@@ -58,14 +58,12 @@ class Consul:
     def get(self, config_key):
         data = {}
 
-        try:
-            index, data = self.client.kv.get(config_key, index=None)
+        index, data = self.client.kv.get(config_key, index=None)
 
+        if data['Value']:
             return json.loads(data['Value'].decode('UTF-8'))
-        except Exception as e:
-            logging.getLogger(LOGS_KEY).exception(f"Config {config_key} not found")
 
-        return data
+        return {}
 
     def delete_item(self, key):
         try:
