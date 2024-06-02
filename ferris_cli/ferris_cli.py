@@ -53,10 +53,12 @@ class KafkaConfig(object):
         self.json = json
         if not json:
             self.producer = KafkaProducer(
+                api_version="3.6.1",
                 bootstrap_servers=kafka_brokers
             )
         else:
             self.producer = KafkaProducer(
+                api_version="3.6.1",
                 value_serializer=lambda v: json.dumps(v).encode('utf-8'),
                 bootstrap_servers=kafka_brokers
             )

@@ -36,6 +36,10 @@ class FerrisKafka:
         value_serializer = None if not is_json else lambda x: json.dumps(x).encode('utf-8')
 
         self.producer = KafkaProducer(
+            api_version="3.6.1",
+            security_protocol="SSL",
+            ssl_cafile="/usr/local/lib/python3.11/site-packages/certifi/cacert.pem",
+            ssl_certfile="/usr/local/lib/python3.11/site-packages/certifi/cacert.pem",
             bootstrap_servers=broker_address,
             value_serializer=value_serializer,
             max_request_size=10485760
